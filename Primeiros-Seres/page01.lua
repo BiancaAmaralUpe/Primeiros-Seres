@@ -3,9 +3,8 @@ local composer = require("composer")
 local scene = composer.newScene()
 
 -- Variável global para controlar o som
-local somLigado = false  -- Começa com som desligado
-local somChannel  -- Variável para o canal de som
-
+local somLigado = false  
+local somChannel  -
 -- create()
 function scene:create(event)
     local sceneGroup = self.view
