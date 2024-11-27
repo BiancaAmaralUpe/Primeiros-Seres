@@ -2,6 +2,11 @@ local composer = require("composer")
 
 local scene = composer.newScene()
 
+-- Variáveis globais dentro da cena para o som
+local somLigado = false
+local somChannel
+local somCapa
+
 -- create()
 function scene:create(event)
     local sceneGroup = self.view
@@ -26,14 +31,9 @@ function scene:create(event)
     button.x = 60
     button.y = 60
 
-    -- Variável para controlar o estado do som
-    local somLigado = false  -- Começa com som desligado
 
     -- Carrega o som da capa
     local somCapa = audio.loadSound("assets/sounds/contracapa.mp3")
-
-    -- Toca o som inicialmente (não toca até o usuário clicar no botão)
-    local somChannel
 
     -- Função para ligar e desligar o som
     local function toggleSound()
@@ -47,45 +47,39 @@ function scene:create(event)
         else
             -- Liga o som
             somLigado = true
-            button.fill = { type="image", filename="assets/images/audio_on.png" }  
-            somChannel = audio.play(somCapa, { loops = -1 })  
+            button.fill = { type="image", filename="assets/images/audio_on.png" }  -- Muda a imagem para som ligado
+            somChannel = audio.play(somCapa, { loops = -1 })  -- Toca em loop
         end
     end
     button:addEventListener("tap", toggleSound)
 
 end
 
-
--- show()
-function scene:show(event)
-    local sceneGroup = self.view
-    local phase = event.phase
-
-    if (phase == "will") then
-
-    elseif (phase == "did") then
-
-    end
-end
-
 -- hide()
 function scene:hide(event)
-    local sceneGroup = self.view
-    local phase = event.phase
+   local sceneGroup = self.view
+   local phase = event.phase
 
-    if (phase == "will") then
-
-    elseif (phase == "did") then
-
-    end
+   if (phase == "will") then
+       -- Para o som automaticamente ao mudar de página
+       if somLigado then
+           somLigado = false
+           if somChannel then
+               audio.stop(somChannel)
+           end
+       end
+   end
 end
 
 -- destroy()
 function scene:destroy(event)
-    local sceneGroup = self.view
-    
-    -- Não é necessário remover manualmente o sceneGroup, o Composer cuida disso automaticamente
+   -- Libera o recurso de som ao destruir a cena
+   if somCapa then
+       audio.dispose(somCapa)
+       somCapa = nil
+   end
 end
+
 
 -- -----------------------------------------------------------------------------------
 -- Scene event function listeners
