@@ -2,6 +2,11 @@ local composer = require("composer")
 
 local scene = composer.newScene()
 
+-- Variáveis globais dentro da cena para o som
+local somLigado = false
+local somChannel
+local somCapa
+
 -- create()
 function scene:create(event)
     local sceneGroup = self.view
@@ -27,64 +32,57 @@ function scene:create(event)
         composer.gotoScene("Contracapa", {effect = "fromRight", time = 1000})
     end)
 
-    -- Botão para ligar e desligar o som
-    local button = display.newImageRect(sceneGroup, "assets/images/audio_off.png", 110, 110)
-    button.x = 60
-    button.y = 60
+-- Botão para ligar e desligar o som
+local button = display.newImageRect(sceneGroup, "assets/images/audio_off.png", 110, 110)  
+button.x = 60
+button.y = 60
 
-    -- Variável para controlar o estado do som
-    local somLigado = false
-
-    -- Carrega o som
-    local somCapa = audio.loadSound("assets/sounds/referencias.mp3")
-    local somChannel
+    -- Carrega o som da página 
+    somCapa = audio.loadSound("assets/sounds/referencias.mp3")
 
     -- Função para ligar e desligar o som
     local function toggleSound()
         if somLigado then
+            -- Desliga o som
             somLigado = false
-            button.fill = { type = "image", filename = "assets/images/audio_off.png" }
+            button.fill = { type="image", filename="assets/images/audio_off.png" }  -- Muda a imagem para som desligado
             if somChannel then
                 audio.pause(somChannel)
             end
         else
+            -- Liga o som
             somLigado = true
-            button.fill = { type = "image", filename = "assets/images/audio_on.png" }
-            somChannel = audio.play(somCapa, { loops = -1 })
+            button.fill = { type="image", filename="assets/images/audio_on.png" }  -- Muda a imagem para som ligado
+            somChannel = audio.play(somCapa, { loops = -1 })  -- Toca em loop
         end
     end
     button:addEventListener("tap", toggleSound)
-end
 
--- show()
-function scene:show(event)
-    local sceneGroup = self.view
-    local phase = event.phase
-
-    if (phase == "will") then
-
-    elseif (phase == "did") then
-
-    end
 end
 
 -- hide()
 function scene:hide(event)
-    local sceneGroup = self.view
-    local phase = event.phase
+   local sceneGroup = self.view
+   local phase = event.phase
 
-    if (phase == "will") then
-
-    elseif (phase == "did") then
-    end
+   if (phase == "will") then
+       -- Para o som automaticamente ao mudar de página
+       if somLigado then
+           somLigado = false
+           if somChannel then
+               audio.stop(somChannel)
+           end
+       end
+   end
 end
 
 -- destroy()
 function scene:destroy(event)
-    local sceneGroup = self.view
-
-    sceneGroup:removeSelf()
-    sceneGroup = nil
+   -- Libera o recurso de som ao destruir a cena
+   if somCapa then
+       audio.dispose(somCapa)
+       somCapa = nil
+   end
 end
 
 -- Scene event function listeners

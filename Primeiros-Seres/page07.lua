@@ -2,10 +2,10 @@ composer = require("composer")
 
 local scene = composer.newScene()
 
--- Variáveis globais de som (fora do método create para garantir que sejam acessíveis por toda a cena)
+-- Variáveis globais dentro da cena para o som
+local somLigado = false
 local somChannel
 local somCapa
-local somLigado = false
 
 -- create()
 function scene:create(event)
@@ -97,64 +97,57 @@ function scene:create(event)
         composer.gotoScene("page08", {effect = "fromRight", time = 1000})
     end)
 
-    -- Botão para ligar e desligar o som
-    local button = display.newImageRect(sceneGroup, "assets/images/audio_off.png", 110, 110)
-    button.x = 60
-    button.y = 60
+   -- Botão para ligar e desligar o som
+   local button = display.newImageRect(sceneGroup, "assets/images/audio_off.png", 110, 110)  
+   button.x = 60
+   button.y = 60
 
-    -- Carrega o som
-    somCapa = audio.loadSound("assets/sounds/page07.mp3")
+   -- Carrega o som da página 02
+   somCapa = audio.loadSound("assets/sounds/page07.mp3")
 
-    -- Função para ligar e desligar o som
-    local function toggleSound()
-        if somLigado then
-            somLigado = false
-            button.fill = { type = "image", filename = "assets/images/audio_off.png" }
-            if somChannel then
-                audio.pause(somChannel)
-            end
-        else
-            somLigado = true
-            button.fill = { type = "image", filename = "assets/images/audio_on.png" }
-            somChannel = audio.play(somCapa, { loops = -1 })
-        end
-    end
-    button:addEventListener("tap", toggleSound)
+   -- Função para ligar e desligar o som
+   local function toggleSound()
+       if somLigado then
+           -- Desliga o som
+           somLigado = false
+           button.fill = { type="image", filename="assets/images/audio_off.png" }  -- Muda a imagem para som desligado
+           if somChannel then
+               audio.pause(somChannel)
+           end
+       else
+           -- Liga o som
+           somLigado = true
+           button.fill = { type="image", filename="assets/images/audio_on.png" }  -- Muda a imagem para som ligado
+           somChannel = audio.play(somCapa, { loops = -1 })  -- Toca em loop
+       end
+   end
+   button:addEventListener("tap", toggleSound)
+
 end
 
 -- hide()
 function scene:hide(event)
-    local sceneGroup = self.view
-    local phase = event.phase
+  local sceneGroup = self.view
+  local phase = event.phase
 
-    if (phase == "will") then
-        -- Pausa ou para o áudio ao mudar de página
-        if somChannel then
-            audio.stop(somChannel)
-            somChannel = nil  -- Garante que o canal de áudio seja limpo
-        end
-    elseif (phase == "did") then
-    end
+  if (phase == "will") then
+      -- Para o som automaticamente ao mudar de página
+      if somLigado then
+          somLigado = false
+          if somChannel then
+              audio.stop(somChannel)
+          end
+      end
+  end
 end
 
 -- destroy()
 function scene:destroy(event)
-    local sceneGroup = self.view
-
-    -- Garantir que o áudio seja interrompido também ao destruir a cena
-    if somChannel then
-        audio.stop(somChannel)
-        somChannel = nil  -- Limpa o canal de áudio
-    end
-
-    -- Limpeza de recursos
-    if somCapa then
-        audio.dispose(somCapa)
-        somCapa = nil
-    end
-
-    sceneGroup:removeSelf()
-    sceneGroup = nil
+  -- Libera o recurso de som ao destruir a cena
+  if somCapa then
+      audio.dispose(somCapa)
+      somCapa = nil
+  end
 end
 
 -- Scene event function listeners

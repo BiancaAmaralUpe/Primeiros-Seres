@@ -2,12 +2,10 @@ local composer = require("composer")
 
 local scene = composer.newScene()
 
--- Variáveis globais para os botões e imagem de fundo
-local imgCapa, button, btnVoltar, btnAvancar
-
--- Variáveis para o controle do som
-local somLigado = false  -- Começa com som desligado
-local somChannel -- Variável para controlar o canal de som
+-- Variáveis globais dentro da cena para o som
+local somLigado = false
+local somChannel
+local somCapa
 
 -- create()
 function scene:create(event)
@@ -90,12 +88,12 @@ function scene:create(event)
     btnAvancar:addEventListener('tap', btnAvancar.handle)
 
     -- Botão para ligar e desligar o som
-    button = display.newImageRect(sceneGroup, "assets/images/audio_off.png", 110, 110)
+    local button = display.newImageRect(sceneGroup, "assets/images/audio_off.png", 110, 110)  
     button.x = 60
     button.y = 60
 
     -- Carrega o som da página 02
-    local somCapa = audio.loadSound("assets/sounds/page06.mp3")
+    somCapa = audio.loadSound("assets/sounds/page06.mp3")
 
     -- Função para ligar e desligar o som
     local function toggleSound()
@@ -113,32 +111,33 @@ function scene:create(event)
             somChannel = audio.play(somCapa, { loops = -1 })  -- Toca em loop
         end
     end
-
-    -- Adiciona o evento de clique para o botão de som
     button:addEventListener("tap", toggleSound)
+
 end
 
 -- hide()
 function scene:hide(event)
-    local sceneGroup = self.view
-    local phase = event.phase
+   local sceneGroup = self.view
+   local phase = event.phase
 
-    if (phase == "will") then
-        -- Quando a cena está prestes a desaparecer, parar o som se estiver tocando
-        if somChannel then
-            audio.stop(somChannel)  -- Para o som ao mudar de página
-        end
-    elseif (phase == "did") then
-        -- Código para quando a cena já desapareceu
-    end
+   if (phase == "will") then
+       -- Para o som automaticamente ao mudar de página
+       if somLigado then
+           somLigado = false
+           if somChannel then
+               audio.stop(somChannel)
+           end
+       end
+   end
 end
 
 -- destroy()
 function scene:destroy(event)
-    local sceneGroup = self.view
-    -- Limpeza de objetos e variáveis da cena
-    sceneGroup:removeSelf()
-    sceneGroup = nil
+   -- Libera o recurso de som ao destruir a cena
+   if somCapa then
+       audio.dispose(somCapa)
+       somCapa = nil
+   end
 end
 
 -- -----------------------------------------------------------------------------------

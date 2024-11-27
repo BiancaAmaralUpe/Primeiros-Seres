@@ -2,6 +2,11 @@ local composer = require("composer")
 
 local scene = composer.newScene()
 
+-- Variáveis globais dentro da cena para o som
+local somLigado = false
+local somChannel
+local somCapa
+
 -- create()
 function scene:create(event)
     local sceneGroup = self.view
@@ -97,63 +102,58 @@ function scene:create(event)
     end)
 
     -- Botão para ligar e desligar o som
-    local button = display.newImageRect(sceneGroup, "assets/images/audio_off.png", 110, 110)
+    local button = display.newImageRect(sceneGroup, "assets/images/audio_off.png", 110, 110)  
     button.x = 60
     button.y = 60
 
-    -- Variável para controlar o estado do som
-    local somLigado = false
-
-    local somCapa = audio.loadSound("assets/sounds/page08.mp3")
-    local somChannel
+    -- Carrega o som da página 
+    somCapa = audio.loadSound("assets/sounds/page08.mp3")
 
     -- Função para ligar e desligar o som
     local function toggleSound()
         if somLigado then
+            -- Desliga o som
             somLigado = false
-            button.fill = { type = "image", filename = "assets/images/audio_off.png" }
+            button.fill = { type="image", filename="assets/images/audio_off.png" }  -- Muda a imagem para som desligado
             if somChannel then
                 audio.pause(somChannel)
             end
         else
+            -- Liga o som
             somLigado = true
-            button.fill = { type = "image", filename = "assets/images/audio_on.png" }
-            somChannel = audio.play(somCapa, { loops = -1 })
-            composer.setVariable("somChannel", somChannel)  -- Salva o somChannel globalmente
+            button.fill = { type="image", filename="assets/images/audio_on.png" }  -- Muda a imagem para som ligado
+            somChannel = audio.play(somCapa, { loops = -1 })  -- Toca em loop
         end
     end
     button:addEventListener("tap", toggleSound)
+
 end
 
 -- hide()
 function scene:hide(event)
-    local sceneGroup = self.view
-    local phase = event.phase
+   local sceneGroup = self.view
+   local phase = event.phase
 
-    if (phase == "will") then
-        -- Para o áudio quando a cena estiver sendo ocultada (ao mudar de cena)
-        local somChannel = composer.getVariable("somChannel")
-        if somChannel then
-            audio.stop(somChannel)
-        end
-    elseif (phase == "did") then
-        -- Não precisa fazer nada aqui, o áudio já foi parado
-    end
+   if (phase == "will") then
+       -- Para o som automaticamente ao mudar de página
+       if somLigado then
+           somLigado = false
+           if somChannel then
+               audio.stop(somChannel)
+           end
+       end
+   end
 end
 
 -- destroy()
 function scene:destroy(event)
-    local sceneGroup = self.view
-
-    -- Para o áudio ao destruir a cena
-    local somChannel = composer.getVariable("somChannel")
-    if somChannel then
-        audio.stop(somChannel)
-    end
-
-    sceneGroup:removeSelf()
-    sceneGroup = nil
+   -- Libera o recurso de som ao destruir a cena
+   if somCapa then
+       audio.dispose(somCapa)
+       somCapa = nil
+   end
 end
+
 -- Scene event function listeners
 scene:addEventListener("create", scene)
 scene:addEventListener("show", scene)
