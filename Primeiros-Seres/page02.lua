@@ -32,7 +32,20 @@ function scene:create(event)
 
     local imagemIndex = 1  -- Índice para rastrear a imagem atual
 
-    -- Função para alternar a imagem
+    -- Mensagem de instrução
+    local instrucao = display.newText({
+        parent = sceneGroup,
+        text = "Toque na imagem para alternar entre as organelas",
+        x = 400,
+        y = 640,
+        width = display.contentWidth - 40,
+        font = native.systemFont,
+        fontSize = 20,
+        align = "center"
+    })
+    instrucao:setFillColor(0, 0, 0)
+
+    -- Função para alternar a imagem com animação
     local function trocarImagem()
         imagemIndex = imagemIndex + 1
 
@@ -41,8 +54,11 @@ function scene:create(event)
             imagemIndex = 1
         end
 
-        -- Altera a imagem exibida
-        imgAtual.fill = { type = "image", filename = imagens[imagemIndex] }
+        -- Animação de transição (fade out e fade in)
+        transition.to(imgAtual, {time = 500, alpha = 0, onComplete = function()
+            imgAtual.fill = { type = "image", filename = imagens[imagemIndex] }
+            transition.to(imgAtual, {time = 500, alpha = 1})
+        end})
     end
 
     -- Adiciona o evento de toque para mudar a imagem

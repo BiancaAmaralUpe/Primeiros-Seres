@@ -86,7 +86,7 @@ function scene:create(event)
     btnVoltar.x = 100
     btnVoltar.y = 963
     btnVoltar:addEventListener('tap', function()
-        composer.gotoScene("page06", {effect = "fromLeft", time = 1000})
+        composer.gotoScene("page05", {effect = "fromLeft", time = 1000})
     end)
 
     -- Botão para avançar

@@ -92,7 +92,7 @@ function scene:create(event)
     btnAvancar.y = 963
 
     function btnAvancar.handle(event)
-        composer.gotoScene("page06", {effect = "fromRight", time = 1000})
+        composer.gotoScene("page07", {effect = "fromRight", time = 1000})
     end
 
     btnAvancar:addEventListener('tap', btnAvancar.handle)

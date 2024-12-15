@@ -1,5 +1,4 @@
 local composer = require("composer")
-
 local scene = composer.newScene()
 
 -- Variáveis globais dentro da cena para o som
@@ -31,23 +30,32 @@ function scene:create(event)
 
     local imagemIndex = 1  -- Índice para rastrear a imagem atual
 
-    -- Função para alternar a imagem ao arrastar para a direita
-    local function trocarImagem(event)
-        if event.phase == "ended" and event.xStart < event.x then
-            imagemIndex = imagemIndex + 1
+    -- Função para alternar a imagem com animação
+    local function trocarImagem()
+        imagemIndex = imagemIndex + 1
 
-            -- Se passar do final da lista, reinicia para a primeira imagem
-            if imagemIndex > #imagens then
-                imagemIndex = 1
-            end
+        -- Se chegar ao fim da lista, reinicia para a primeira
+        if imagemIndex > #imagens then
+            imagemIndex = 1
+        end
 
-            -- Altera a imagem exibida
+        -- Animação de transição (fade out e fade in)
+        transition.to(imgAtual, {time = 500, alpha = 0, onComplete = function()
             imgAtual.fill = { type = "image", filename = imagens[imagemIndex] }
+            transition.to(imgAtual, {time = 500, alpha = 1})
+        end})
+    end
+
+    -- Função para detectar shake do acelerômetro
+    local function onShake(event)
+        if event.isShake then
+            -- Chama a função para trocar a imagem quando o dispositivo for agitado
+            trocarImagem()
         end
     end
 
-    -- Adiciona o evento de toque para arrastar a imagem
-    imgAtual:addEventListener("touch", trocarImagem)
+    -- Escuta o evento de shake
+    Runtime:addEventListener("accelerometer", onShake)
 
     -- Botão para voltar
     local btnVoltar = display.newImageRect(sceneGroup, "assets/images/anterior.png", 141, 50)
@@ -71,33 +79,33 @@ function scene:create(event)
 
     btnAvancar:addEventListener('tap', btnAvancar.handle)
 
-     -- Botão para ligar e desligar o som
-     local button = display.newImageRect(sceneGroup, "assets/images/audio_off.png", 110, 110)  
-     button.x = 60
-     button.y = 60
- 
-     -- Carrega o som da página 02
-     somCapa = audio.loadSound("assets/sounds/page03.mp3")
- 
-     -- Função para ligar e desligar o som
-     local function toggleSound()
-         if somLigado then
-             -- Desliga o som
-             somLigado = false
-             button.fill = { type="image", filename="assets/images/audio_off.png" }  -- Muda a imagem para som desligado
-             if somChannel then
-                 audio.pause(somChannel)
-             end
-         else
-             -- Liga o som
-             somLigado = true
-             button.fill = { type="image", filename="assets/images/audio_on.png" }  -- Muda a imagem para som ligado
-             somChannel = audio.play(somCapa, { loops = -1 })  -- Toca em loop
-         end
-     end
-     button:addEventListener("tap", toggleSound)
- 
- end
+    -- Botão para ligar e desligar o som
+    local button = display.newImageRect(sceneGroup, "assets/images/audio_off.png", 110, 110)  
+    button.x = 60
+    button.y = 60
+
+    -- Carrega o som da página 02
+    somCapa = audio.loadSound("assets/sounds/page03.mp3")
+
+    -- Função para ligar e desligar o som
+    local function toggleSound()
+        if somLigado then
+            -- Desliga o som
+            somLigado = false
+            button.fill = { type="image", filename="assets/images/audio_off.png" }  -- Muda a imagem para som desligado
+            if somChannel then
+                audio.pause(somChannel)
+            end
+        else
+            -- Liga o som
+            somLigado = true
+            button.fill = { type="image", filename="assets/images/audio_on.png" }  -- Muda a imagem para som ligado
+            somChannel = audio.play(somCapa, { loops = -1 })  -- Toca em loop
+        end
+    end
+    button:addEventListener("tap", toggleSound)
+
+end
 
 -- hide()
 function scene:hide(event)

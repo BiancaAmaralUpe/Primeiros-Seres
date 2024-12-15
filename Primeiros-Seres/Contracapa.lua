@@ -16,6 +16,18 @@ function scene:create(event)
     imgCapa.x = display.contentCenterX
     imgCapa.y = display.contentCenterY
 
+    -- Mensagem de instrução
+    local instrucao = display.newText({
+        parent = sceneGroup,
+        text = "Início",
+        x = 640,
+        y = 850,
+        font = native.systemFont,
+        fontSize = 24,
+        align = "right"
+    })
+    instrucao:setFillColor(0, 0, 0)
+
     -- Botão para ir para a Page01
     local Avancar = display.newImageRect(sceneGroup, "assets/images/home.png", 130, 130)
     Avancar.x = 640
@@ -25,6 +37,17 @@ function scene:create(event)
     Avancar:addEventListener('tap', function()
         composer.gotoScene("Capa", {effect = "fromRight", time = 1000})
     end)
+
+    -- Botão para voltar 
+    local btnVoltar = display.newImageRect(sceneGroup, "assets/images/anterior.png", 141, 50)
+    btnVoltar.x = 100
+    btnVoltar.y = 963
+
+    function btnVoltar.handle(event)
+        composer.gotoScene("page09", {effect = "fromLeft", time = 1000})
+    end
+
+    btnVoltar:addEventListener('tap', btnVoltar.handle)
 
     -- Botão para ligar e desligar o som
     local button = display.newImageRect(sceneGroup, "assets/images/audio_off.png", 110, 110)  

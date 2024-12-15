@@ -16,17 +16,18 @@ function scene:create(event)
     imgCapa.y = display.contentCenterY
 
     -- Adiciona a imagem "tempo.png"
-    local imgTempo = display.newImageRect(sceneGroup, "assets/images/tempo.png", 600, 200)
-    imgTempo.x = 100 -- Exibida pela metade (600 / 2 = 300, então metade está fora da tela)
-    imgTempo.y = 750
+    local imgTempo = display.newImageRect(sceneGroup, "assets/images/tempo.png", 500, 300)
+    imgTempo.x = 400
+    imgTempo.y = 780
+    imgTempo:setMask(graphics.newMask("assets/images/tempo.png")) 
 
-    -- Função para permitir que a imagem seja arrastada
+    -- Função para permitir que a imagem seja arrastada horizontalmente
     local function dragImage(event)
         if event.phase == "began" then
             display.currentStage:setFocus(event.target)
             event.target.touchOffsetX = event.x - event.target.x
         elseif event.phase == "moved" then
-            event.target.x = event.x - event.target.touchOffsetX
+            event.target.width = math.min(600, math.max(300, event.x - event.target.x + 300)) -- Atualiza a largura da imagem
         elseif event.phase == "ended" or event.phase == "cancelled" then
             display.currentStage:setFocus(nil)
         end
@@ -35,6 +36,11 @@ function scene:create(event)
 
     -- Adiciona o listener de toque na imagem para arrastar
     imgTempo:addEventListener("touch", dragImage)
+
+    -- Animação inicial para mostrar como interagir
+    transition.to(imgTempo, {time = 1000, width = 350, onComplete = function()
+        transition.to(imgTempo, {time = 1000, width = 300})
+    end})
 
     -- Botão para voltar para a Capa
     local btnVoltar = display.newImageRect(sceneGroup, "assets/images/anterior.png", 141, 50)
